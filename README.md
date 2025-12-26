@@ -41,3 +41,13 @@ How To Install:
     Enjoy!
 
     PS: only tested on Ubuntu Server 24.04 I cannot say it will work on anything else but you can always try! :)
+
+![Screenshot_20251226_204750.png](https://github.com/user-attachments/assets/6545ccec-3291-4515-8d40-dee9fc980c58)
+
+![Screenshot_20251226_204641.png](https://github.com/user-attachments/assets/34f6e4c3-084a-40e6-a90c-e569e3c5118c)
+
+![Screenshot_20251226_204913.png](https://github.com/user-attachments/assets/21b790ef-56bd-4716-b337-8910f9b11298)
+
+![Screenshot_20251226_204704.png](https://github.com/user-attachments/assets/49565028-147b-42d2-b1eb-c5abdf913d66)
+
+![Screenshot_20251226_204717.png](https://github.com/user-attachments/assets/a5b9d1b5-9812-4fbb-ab5b-b404e175efc4)
