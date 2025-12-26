@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BeamMP Neon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.08); --accent: #00f2ff; --danger: #ff2d55; --success: #00ff88; --bg: #030305; }
+        * { box-sizing: border-box; }
+        body { background-color: var(--bg); color: #e0e0e0; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; height: 100vh; overflow: hidden; animation: riseUp 0.6s ease-out; }
+        @keyframes riseUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .container { max-width: 1600px; margin: auto; display: grid; grid-template-columns: 320px 1fr 320px; gap: 20px; height: calc(100vh - 40px); }
+        .card { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 15px; padding: 18px; margin-bottom: 15px; }
+        h2 { font-family: 'Orbitron'; font-size: 0.65rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 0; margin-bottom: 15px; }
+        .btn { width: 100%; padding: 11px; border-radius: 7px; border: 1px solid var(--glass-border); background: transparent; color: #fff; font-weight: bold; cursor: pointer; margin-bottom: 8px; font-family: 'Orbitron'; font-size: 0.6rem; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-cyan { border-color: var(--accent); color: var(--accent); }
+        .btn-cyan:hover { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent); }
+        .btn-red { border-color: var(--danger); color: var(--danger); }
+        .btn-red:hover { background: var(--danger); color: #fff; box-shadow: 0 0 15px var(--danger); }
+        .btn-ghost { color: #555; border-color: #222; }
+        .btn-ghost:hover { border-color: #aaa; color: #fff; }
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 15px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #222; transition: .4s; border-radius: 34px; border: 1px solid var(--glass-border); }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: #555; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: rgba(0, 242, 255, 0.2); border-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); background-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        textarea { width: 100%; height: 280px; background: rgba(0,0,0,0.5); border: 1px solid #222; border-radius: 10px; color: var(--success); padding: 12px; font-family: monospace; resize: none; outline: none; }
+        .console { background: #000; height: 350px; border-radius: 10px; padding: 12px; font-family: monospace; font-size: 11px; overflow-y: auto; border: 1px solid #111; color: #666; }
+        .mod-list { font-size: 10px; list-style: none; padding: 0; height: 120px; overflow-y: auto; margin-bottom: 15px; }
+        .mod-list li { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        .del-x { color: #444; cursor: pointer; font-weight: bold; font-size: 14px; margin-left: 10px; transition: 0.2s; }
+        .del-x:hover { color: var(--danger); text-shadow: 0 0 5px var(--danger); }
+        #warning-overlay, #lost-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(20px); background: rgba(0,0,0,0.92); }
+        #lost-overlay { z-index: 10000; flex-direction: column; text-align: center; }
+        .modal-box { background: #08080a; border: 1px solid var(--glass-border); padding: 35px; border-radius: 20px; width: 360px; text-align: center; }
+        #p-container { width: 100%; background: #111; border-radius: 10px; height: 8px; margin: 20px 0; display: none; overflow: hidden; border: 1px solid #222; }
+        #p-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
+        #toast { visibility: hidden; min-width: 200px; background-color: var(--accent); color: #000; text-align: center; border-radius: 5px; padding: 12px; position: fixed; z-index: 9998; left: 50%; bottom: 30px; transform: translateX(-50%); font-family: 'Orbitron'; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+        #toast.show { visibility: visible; animation: fadeinout 2.5s; }
+        @keyframes fadeinout { 0%, 100% { opacity: 0; bottom: 0; } 15%, 85% { opacity: 1; bottom: 30px; } }
+        .stat-val { font-family: 'Orbitron'; font-size: 1.1rem; color: #fff; }
+        .glow-red { color: var(--danger); text-shadow: 0 0 20px var(--danger); font-family: 'Orbitron'; font-size: 1.5rem; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+<div id="toast">ACTION COMPLETE</div>
+<div id="lost-overlay">
+    <div class="glow-red">CONNECTION LOST</div>
+    <p style="font-size: 12px; color: #555;">The web interface process is offline or unreachable.</p>
+    <div style="margin-top: 20px; width: 40px; height: 40px; border: 3px solid rgba(255,45,85,0.1); border-top-color: var(--danger); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+</div>
+<div id="warning-overlay">
+    <div class="modal-box">
+        <h2 id="w-title">ALERT</h2>
+        <p id="w-text" style="font-size: 11px; color: #777; margin-bottom: 25px;"></p>
+        <div id="p-container"><div id="p-bar"></div></div>
+        <p id="w-sub" style="font-size: 10px; color: var(--accent); margin-bottom: 20px; font-family: 'Orbitron';"></p>
+        <button class="btn btn-cyan" id="w-confirm">OK</button>
+        <button class="btn btn-ghost" id="w-cancel" onclick="closeWarning()">CANCEL</button>
+    </div>
+</div>
+<div class="container">
+    <div class="side-left">
+        <div class="card" style="height: 100%;">
+            <h2>Management</h2>
+            <div class="toggle-row">
+                <span style="font-size: 9px; font-family: 'Orbitron'; letter-spacing: 1px;">AUTOSTART</span>
+                <label class="switch">
+                    <input type="checkbox" id="autoToggle" onchange="saveAutostart()" {% if autostart == 'true' %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <button class="btn btn-cyan" onclick="runAction('start')">Start</button>
+            <button class="btn btn-cyan" onclick="runAction('restart')">Restart</button>
+            <button class="btn btn-red" onclick="runAction('stop')">Stop</button>
+            <button class="btn btn-cyan" onclick="triggerUpdate()">Update</button>
+            <hr style="border:0; border-top:1px solid var(--glass-border); margin:20px 0;">
+            <button class="btn btn-ghost" onclick="window.location.href='/logout'">Logout</button>
+            <button class="btn btn-red" onclick="triggerShutdownPanel()">Shutdown Interface</button>
+            <button class="btn btn-red" onclick="triggerReset()">Reset</button>
+        </div>
+    </div>
+    <div class="main-center">
+        <div class="card">
+            <h2>Config Editor</h2>
+            <textarea id="config_data">{{ info }}</textarea>
+            <button class="btn btn-cyan" style="margin-top:12px;" onclick="saveConfig()">Save</button>
+        </div>
+        <div class="card">
+            <h2>Console</h2>
+            <div id="console" class="console"></div>
+        </div>
+    </div>
+    <div class="side-right">
+        <div class="card">
+            <h2>Telemetry</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; text-align:center;">
+                <div><small style="font-size: 8px; opacity: 0.4;">CPU</small><div id="cpu_val" class="stat-val">0%</div></div>
+                <div><small style="font-size: 8px; opacity: 0.4;">RAM</small><div id="ram_val" class="stat-val">0%</div></div>
+            </div>
+            <div id="status-badge" style="text-align:center; font-family: 'Orbitron'; font-size: 10px; margin-top:20px;">SYNCING...</div>
+        </div>
+        <div class="card" style="height: calc(100% - 150px); overflow:hidden; display:flex; flex-direction:column;">
+            <h2>Mods</h2>
+            <div style="flex-grow: 1; overflow-y: auto;">
+                <div style="font-size: 8px; color: var(--accent); margin-bottom: 5px; opacity: 0.7;">CLIENT RESOURCES</div>
+                <ul id="client-list" class="mod-list"></ul>
+                <div style="border-top: 1px solid rgba(255,255,255,0.05); margin: 10px 0;"></div>
+                <div style="font-size: 8px; color: var(--accent); margin-bottom: 5px; opacity: 0.7;">SERVER RESOURCES</div>
+                <ul id="server-list" class="mod-list"></ul>
+            </div>
+            <input type="file" id="modFile" hidden onchange="uploadMod('Server')">
+            <button class="btn btn-ghost" onclick="document.getElementById('modFile').click()">+ Server Mod</button>
+            <input type="file" id="modFileClient" hidden onchange="uploadMod('Client')">
+            <button class="btn btn-ghost" onclick="document.getElementById('modFileClient').click()">+ Client Mod</button>
+        </div>
+    </div>
+</div>
+<style> @keyframes spin { to { transform: rotate(360deg); } } </style>
+<script>
+    const lostOverlay = document.getElementById('lost-overlay');
+    const overlay = document.getElementById('warning-overlay');
+    const wTitle = document.getElementById('w-title');
+    const wText = document.getElementById('w-text');
+    const wConfirm = document.getElementById('w-confirm');
+    const wCancel = document.getElementById('w-cancel');
+    const pContainer = document.getElementById('p-container');
+    const pBar = document.getElementById('p-bar');
+    const pSub = document.getElementById('w-sub');
+    function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.innerText = msg.toUpperCase();
+        t.className = "show";
+        setTimeout(() => t.className = "", 2500);
+    }
+    function saveAutostart() {
+        const state = document.getElementById('autoToggle').checked ? "true" : "false";
+        fetch('/toggle_autostart', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({state: state}) }).then(() => showToast("Autostart " + (state === "true" ? "ON" : "OFF")));
+    }
+    function openWarning(title, text, color, action, showCancel = true) {
+        wTitle.innerText = title; wTitle.style.color = color; wText.innerText = text;
+        wConfirm.onclick = action; wConfirm.className = color === "var(--danger)" ? "btn btn-red" : "btn btn-cyan";
+        wConfirm.style.display = action ? "block" : "none";
+        wCancel.style.display = showCancel ? "block" : "none";
+        pContainer.style.display = "none"; pSub.innerText = "";
+        overlay.style.display = 'flex';
+    }
+    function closeWarning() { overlay.style.display = 'none'; }
+    function saveConfig() {
+        const fd = new FormData(); fd.append('config_data', document.getElementById('config_data').value);
+        fetch('/save', {method: 'POST', body: fd}).then(res => res.json()).then(data => {
+            if(data.is_running) openWarning("SAVED", "Restart server to apply config?", "var(--accent)", () => { runAction('restart'); closeWarning(); });
+            else showToast("CONFIG SAVED");
+        });
+    }
+    function uploadMod(target) {
+        const file = document.getElementById(target === 'Client' ? 'modFileClient' : 'modFile').files[0];
+        const fd = new FormData(); fd.append('file', file); fd.append('target', target);
+        openWarning("UPLOADING", file.name, "var(--accent)", null, false);
+        pContainer.style.display = "block";
+        const xhr = new XMLHttpRequest();
+        let start = Date.now();
+        xhr.upload.onprogress = (e) => {
+            const pc = Math.round((e.loaded/e.total)*100);
+            const spd = (e.loaded/1024/1024)/(Math.max((Date.now()-start)/1000, 1));
+            pBar.style.width = pc + "%"; pSub.innerText = `${pc}% | ${spd.toFixed(2)} MB/s`;
+        };
+        xhr.onload = () => {
+            const d = JSON.parse(xhr.responseText);
+            if(d.needs_restart) openWarning("SUCCESS", "Restart server to apply mod?", "var(--success)", () => { runAction('restart'); closeWarning(); });
+            else { closeWarning(); showToast("UPLOADED"); }
+        };
+        xhr.open("POST", "/upload"); xhr.send(fd);
+    }
+    function triggerDeleteMod(target, filename) {
+        openWarning("DELETE", `Remove ${filename}?`, "var(--danger)", () => {
+            fetch('/delete_mod', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({target, filename})}).then(() => { closeWarning(); showToast("DELETED"); });
+        });
+    }
+    function triggerUpdate() {
+        openWarning("UPDATE", "Download latest build?", "var(--accent)", () => {
+            fetch('/update_server', {method: 'POST'});
+            wConfirm.style.display = "none"; wCancel.style.display = "none"; pContainer.style.display = 'block';
+            const timer = setInterval(() => {
+                fetch('/update_status').then(r => r.json()).then(d => {
+                    pBar.style.width = d.percent + "%"; pSub.innerText = `${d.speed} | ${d.percent}%`;
+                    if(d.status === "success") { clearInterval(timer); openWarning("DONE", "Restart now?", "var(--success)", () => { runAction('restart'); closeWarning(); }); }
+                });
+            }, 800);
+        });
+    }
+    function triggerReset() { openWarning("RESET", "Wipe all panel settings?", "var(--danger)", () => fetch('/factory_reset', {method:'POST'}).then(()=>window.location.href='/setup')); }
+    function triggerShutdownPanel() { openWarning("SHUTDOWN", "Kill the web panel process?", "var(--danger)", () => fetch('/shutdown_panel', {method:'POST'})); }
+    function runAction(cmd) { fetch('/action/' + cmd).then(() => showToast(cmd)); }
+    setInterval(() => {
+        fetch('/stats', { signal: AbortSignal.timeout(2000) })
+            .then(r => { lostOverlay.style.display = 'none'; return r.json(); })
+            .then(d => {
+                document.getElementById('cpu_val').innerText = d.cpu + "%";
+                document.getElementById('ram_val').innerText = d.ram + "%";
+                document.getElementById('status-badge').innerHTML = `STATUS: <span style="color:${d.status === 'ONLINE' ? 'var(--success)' : 'var(--danger)'}">${d.status}</span>`;
+                document.getElementById('client-list').innerHTML = d.client_mods.map(m => `<li><span>📦 ${m}</span><span class="del-x" onclick="triggerDeleteMod('Client', '${m}')">×</span></li>`).join('');
+                document.getElementById('server-list').innerHTML = d.server_mods.map(m => `<li><span>📦 ${m}</span><span class="del-x" onclick="triggerDeleteMod('Server', '${m}')">×</span></li>`).join('');
+            })
+            .catch(() => { lostOverlay.style.display = 'flex'; });
+        fetch('/console', { signal: AbortSignal.timeout(2000) })
+            .then(r => r.text())
+            .then(t => { const c = document.getElementById('console'); c.innerText = t; c.scrollTop = c.scrollHeight; })
+            .catch(() => {});
+    }, 1500);
+</script>
+</body>
+</html>
